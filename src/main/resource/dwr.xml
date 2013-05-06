@@ -16,7 +16,8 @@
 	<context:component-scan base-package="org.cweili.*.*,org.cweili.*.*.*"/>
 	
 	<dwr:configuration>
-		<dwr:convert type="bean" class="org.directwebremoting.ScriptSession"/>
+		<dwr:convert type="collection" class="java.util.Collection" />
+		<dwr:convert type="bean" class="java.lang.Object" />
 	</dwr:configuration>
 	<dwr:annotation-config id="dwrAnnotationConfig"/>
 	<dwr:annotation-scan base-package="org.cweili.*.*" scanDataTransferObject="true" scanRemoteProxy="true"/>
