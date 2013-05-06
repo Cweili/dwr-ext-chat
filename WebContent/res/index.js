@@ -2,6 +2,17 @@ Ext.tip.QuickTipManager.init();
 
 Ext.onReady(function() {
 	
+	var onlineListStore =  Ext.create('Ext.data.Store', {
+		proxy: {
+	        type: 'memory'
+		}
+	});
+	
+	var onlineListGrid = {
+			xtype: 'grid',
+			store: onlineListStore
+	};
+	
 	var header = {
 		xtype: 'box',
 		region: 'north',
@@ -16,7 +27,8 @@ Ext.onReady(function() {
 		split: true,
 		width: 200,
 		layout: 'fit',
-		title: '在线列表'
+		title: '在线列表',
+		item: [onlineListGrid]
 	};
 	
 	var messageBox = {
@@ -54,4 +66,14 @@ Ext.onReady(function() {
 		        header, onlineListPanel, messageBox, sendBox
 		]
 	});
+	
+	var updateOnlineList = function(onlineList) {
+		if (onlineList && onlineList.length > 0) {
+			onlineListStore.loadData(onlineList);
+		}
+	};
+	
+	dwr.engine.setActiveReverseAjax(true);
+	
+	Chat.login("" + Math.random(), function() {});
 });
