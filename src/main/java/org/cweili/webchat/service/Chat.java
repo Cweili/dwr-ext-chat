@@ -2,10 +2,10 @@ package org.cweili.webchat.service;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.cweili.webchat.domain.User;
+import org.cweili.webchat.util.StaticVariable;
 import org.directwebremoting.Browser;
 import org.directwebremoting.ScriptSessions;
 import org.directwebremoting.WebContextFactory;
@@ -23,26 +23,21 @@ import org.springframework.stereotype.Service;
 @Service
 public class Chat {
 
-	static final String SUCCESS = "success";
-	static final String ERROR = "error";
-	static final String USERNAME = "username";
-
-	private static Set<User> onlineSet;
-
 	public Chat() {
-		onlineSet = new LinkedHashSet<User>();
+		StaticVariable.chat = this;
 	}
 
 	public String sendMessage(final String message) {
 		final String username;
 		try {
-			username = (String) WebContextFactory.get().getScriptSession().getAttribute(USERNAME);
+			username = (String) WebContextFactory.get().getScriptSession()
+					.getAttribute(StaticVariable.USERNAME);
 		} catch (Exception e) {
-			return ERROR;
+			return StaticVariable.ERROR;
 		}
 
 		if (null == username) {
-			return ERROR;
+			return StaticVariable.ERROR;
 		}
 
 		final String time = time();
@@ -53,41 +48,42 @@ public class Chat {
 			}
 		});
 
-		return SUCCESS;
+		return StaticVariable.SUCCESS;
 	}
 
 	public static Set<User> getOnlineSet() {
-		return onlineSet;
+		return StaticVariable.onlineSet;
 	}
 
 	public void updateOnlineList() {
 		Browser.withCurrentPage(new Runnable() {
 			@Override
 			public void run() {
-				ScriptSessions.addFunctionCall("updateOnlineList", onlineSet);
+				ScriptSessions.addFunctionCall("updateOnlineList", StaticVariable.onlineSet);
 			}
 		});
 	}
 
 	public String login(final String username) {
-		if (onlineSet.contains(new User(username)) || "".equals(username)) {
-			return ERROR;
+		if (StaticVariable.onlineSet.contains(new User(username)) || "".equals(username)) {
+			return StaticVariable.ERROR;
 		} else {
-			onlineSet.add(new User(username, time()));
+			StaticVariable.onlineSet.add(new User(username, time()));
 			updateOnlineList();
-			WebContextFactory.get().getScriptSession().setAttribute(USERNAME, username);
-			return SUCCESS;
+			WebContextFactory.get().getScriptSession()
+					.setAttribute(StaticVariable.USERNAME, username);
+			return StaticVariable.SUCCESS;
 		}
 	}
 
 	public String logout(final String username) {
-		if (!onlineSet.contains(new User(username))) {
-			return ERROR;
+		if (!StaticVariable.onlineSet.contains(new User(username))) {
+			return StaticVariable.ERROR;
 		} else {
-			onlineSet.remove(new User(username));
+			StaticVariable.onlineSet.remove(new User(username));
 			updateOnlineList();
 			WebContextFactory.get().getScriptSession().invalidate();
-			return SUCCESS;
+			return StaticVariable.SUCCESS;
 		}
 	}
 

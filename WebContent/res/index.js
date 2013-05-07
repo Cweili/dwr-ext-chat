@@ -1,6 +1,15 @@
+var SUCCESS = 'success';
+
+var username = null;
 var onlineListStore = null;
 var messageStore = null;
 var editor = null;
+var onlineListGrid = null;
+var messageGrid = null;
+var sendBox = null;
+var viewport = null;
+var loginWindow = null;
+var disabled = false;
 
 function updateOnlineList(onlineList) {
 	if (onlineList && onlineList.length > 0) {
@@ -16,12 +25,55 @@ function addMessage(name, time, message) {
 			message : message
 		});
 	}
+
+	// 滚动到底部
+	if (messageGrid) {
+		messageGrid.getView().focusRow(messageGrid.getStore().getCount() - 1);
+	}
 }
 
 function sendMessage() {
 	if (editor) {
-		Chat.sendMessage(editor.getValue());
-		editor.setValue('');
+		editor.setLoading(true);
+		Chat.sendMessage(editor.getValue(), function(data) {
+			editor.setLoading(false);
+			if (SUCCESS == data) {
+				editor.setValue('');
+			}
+		});
+	}
+}
+
+function openLoginWindow() {
+	if (loginWindow && viewport) {
+		loginWindow.show();
+		toggleDisabled();
+	}
+}
+
+function login(name) {
+	loginWindow.setLoading(true);
+	Chat.login(name, function(data) {
+		toggleDisabled();
+		loginWindow.setLoading(false);
+		if (SUCCESS == data) {
+			username = name;
+			loginWindow.hide();
+		}
+	});
+}
+
+function toggleDisabled() {
+	if (disabled) {
+		disabled = false;
+		onlineListGrid.enable();
+		messageGrid.enable();
+		sendBox.enable();
+	} else {
+		disabled = true;
+		onlineListGrid.disable();
+		messageGrid.disable();
+		sendBox.disable();
 	}
 }
 
@@ -29,6 +81,7 @@ Ext.tip.QuickTipManager.init();
 
 Ext.onReady(function() {
 
+	// 重写 HtmlEditor，添加 Ctrl + Enter 监听
 	Ext.form.HtmlEditor.override({
 		frame : true,
 		initComponent : function() {
@@ -106,8 +159,7 @@ Ext.onReady(function() {
 		}
 	});
 
-	var onlineListGrid = {
-		xtype : 'grid',
+	onlineListGrid = Ext.create('Ext.grid.Panel', {
 		region : 'east',
 		collapsible : true,
 		split : true,
@@ -125,18 +177,9 @@ Ext.onReady(function() {
 			width : 138,
 			hidden : true
 		} ]
-	};
+	});
 
-	var header = {
-		xtype : 'box',
-		region : 'north',
-		html : '<h1>聊天室</h1>',
-		cls : 'header',
-		height : 50
-	};
-
-	var messageGrid = {
-		xtype : 'grid',
+	messageGrid = Ext.create('Ext.grid.Panel', {
 		region : 'center',
 		store : messageStore,
 		columns : [ {
@@ -144,11 +187,14 @@ Ext.onReady(function() {
 			dataIndex : 'message',
 			flex : 1,
 			hideable : false,
-			renderer : renderMessage
+			renderer : function(value, p, record) {
+				return Ext.String.format('<p><strong>{0}</strong> <em>{1}</em>:</p><p>{2}</p>',
+						record.data.name, record.data.time, value);
+			}
 		} ]
-	};
+	});
 
-	var sendBox = {
+	sendBox = Ext.create('Ext.panel.Panel', {
 		region : 'south',
 		collapsible : true,
 		split : true,
@@ -159,14 +205,22 @@ Ext.onReady(function() {
 		items : [ editor ],
 		bbar : [ '->', {
 			width : 160,
-			text : '发送(Ctrl + Enter)',
+			text : '发送 (Ctrl + Enter)',
 			handler : function() {
 				sendMessage();
 			}
 		} ]
+	});
+
+	var header = {
+		xtype : 'box',
+		region : 'north',
+		html : '<h1>聊天室</h1>',
+		cls : 'header',
+		height : 50
 	};
 
-	var viewport = Ext.create('Ext.Viewport', {
+	viewport = Ext.create('Ext.Viewport', {
 		layout : {
 			type : 'border'
 		},
@@ -176,15 +230,54 @@ Ext.onReady(function() {
 		items : [ header, onlineListGrid, messageGrid, sendBox ]
 	});
 
-	dwr.engine.setActiveReverseAjax(true);
+	var required = '<span style="color:red;font-weight:bold" data-qtip="Required">*</span>';
 
-	Chat.login('' + Math.random(), function() {
+	loginWindow = Ext.create('Ext.Window', {
+		title : '登录',
+		width : 300,
+		height : 94,
+		closable : false,
+		border : false,
+		items : [ {
+			xtype : 'form',
+			layout : 'form',
+			id : 'simpleForm',
+			url : 'save-form.php',
+			frame : true,
+			fieldDefaults : {
+				msgTarget : 'side',
+				labelWidth : 75
+			},
+			defaultType : 'textfield',
+			items : [ {
+				fieldLabel : '用户名',
+				name : 'username',
+				afterLabelTextTpl : required,
+				allowBlank : false,
+				minLength : 6
+			} ],
+
+			buttons : [ {
+				text : '重置',
+				handler : function() {
+					this.up('form').getForm().reset();
+				}
+			}, {
+				text : '登录',
+				handler : function() {
+					var form = this.up('form').getForm();
+					if (form.isValid()) {
+						login(form.getValues().username);
+					}
+				}
+			} ]
+		} ]
 	});
 
-	addMessage('hi', 'time', 'conetdsd');
-
-	function renderMessage(value, p, record) {
-		return Ext.String.format('<p><strong>{0}</strong> <em>{1}</em>:</p><p>{2}</p>',
-				record.data.name, record.data.time, value);
+	if (!username) {
+		openLoginWindow();
 	}
+
+	dwr.engine.setActiveReverseAjax(true);
+
 });
