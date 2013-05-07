@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import org.cweili.webchat.domain.User;
 import org.directwebremoting.Browser;
 import org.directwebremoting.ScriptSessions;
 import org.directwebremoting.WebContextFactory;
@@ -26,10 +27,10 @@ public class Chat {
 	static final String ERROR = "error";
 	static final String USERNAME = "username";
 
-	private static Set<String> onlineSet;
+	private static Set<User> onlineSet;
 
 	public Chat() {
-		onlineSet = new LinkedHashSet<String>();
+		onlineSet = new LinkedHashSet<User>();
 	}
 
 	public String sendMessage(final String message) {
@@ -44,7 +45,7 @@ public class Chat {
 			return ERROR;
 		}
 
-		final String time = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
+		final String time = time();
 		Browser.withCurrentPage(new Runnable() {
 			@Override
 			public void run() {
@@ -53,6 +54,10 @@ public class Chat {
 		});
 
 		return SUCCESS;
+	}
+
+	public static Set<User> getOnlineSet() {
+		return onlineSet;
 	}
 
 	public void updateOnlineList() {
@@ -65,10 +70,10 @@ public class Chat {
 	}
 
 	public String login(final String username) {
-		if (onlineSet.contains(username) || "".equals(username)) {
+		if (onlineSet.contains(new User(username)) || "".equals(username)) {
 			return ERROR;
 		} else {
-			onlineSet.add(username);
+			onlineSet.add(new User(username, time()));
 			updateOnlineList();
 			WebContextFactory.get().getScriptSession().setAttribute(USERNAME, username);
 			return SUCCESS;
@@ -76,13 +81,17 @@ public class Chat {
 	}
 
 	public String logout(final String username) {
-		if (!onlineSet.contains(username)) {
+		if (!onlineSet.contains(new User(username))) {
 			return ERROR;
 		} else {
-			onlineSet.remove(username);
+			onlineSet.remove(new User(username));
 			updateOnlineList();
 			WebContextFactory.get().getScriptSession().invalidate();
 			return SUCCESS;
 		}
+	}
+
+	private String time() {
+		return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
 	}
 }

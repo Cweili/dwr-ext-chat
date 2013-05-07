@@ -55,6 +55,7 @@ a:hover {
 .x-btn-default-toolbar-large .x-btn-inner{
 	font-size: 17px;
 }
+
 .x-btn-group-header-text-default-framed{
 	font: normal 12px "Microsoft Yahei", arial, verdana, sans-serif;
 }
@@ -70,9 +71,11 @@ table.x-datepicker-inner a{
 .x-menu-item-text{
 	font-size: 12px;
 }
+/*
 .x-column-header{
-	font: normal 12px /15px "Microsoft Yahei", arial, verdana, sans-serif;font: normal 12px "Microsoft Yahei", arial, verdana, sans-serif;
+	font: normal 12px "Microsoft Yahei", arial, verdana, sans-serif;
 }
+*/
 .x-grid-row .x-grid-cell{
 	font: normal 12px "Microsoft Yahei", arial, verdana, sans-serif;
 }
