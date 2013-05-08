@@ -30,6 +30,15 @@ a:hover {
   text-shadow: 0 1px 0 #4e691f;
 }
 
+.message-meta strong {
+	font-weight: bold;
+	color: #0000ff;
+}
+
+.message-meta em {
+	color: #739b2e;
+}
+
 .x-html-editor-wrap {
     border: 0 !important;
 }

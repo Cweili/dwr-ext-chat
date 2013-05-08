@@ -39,6 +39,8 @@ function sendMessage() {
 			editor.setLoading(false);
 			if (SUCCESS == data) {
 				editor.setValue('');
+			} else {
+				showErrorBox('发送失败', '服务器出现错误', editor);
 			}
 		});
 	}
@@ -51,16 +53,47 @@ function openLoginWindow() {
 	}
 }
 
-function login(name) {
+function login(form) {
 	loginWindow.setLoading(true);
+	form = form.up('form').getForm();
+	var name;
+	if (form.isValid()) {
+		name = form.getValues().username;
+	} else {
+		return;
+	}
 	Chat.login(name, function(data) {
-		toggleDisabled();
 		loginWindow.setLoading(false);
 		if (SUCCESS == data) {
 			username = name;
+			toggleDisabled();
 			loginWindow.hide();
+		} else {
+			showErrorBox('登录失败', '你的用户名已经被占用', loginWindow);
 		}
 	});
+}
+
+function showErrorBox(title, message, target) {
+	if (target) {
+		Ext.MessageBox.show({
+			title : title,
+			msg : message,
+			buttons : Ext.MessageBox.OK,
+			icon : Ext.MessageBox.ERROR,
+			animateTarget : target
+		});
+		setTimeout(function() {
+			Ext.MessageBox.hide();
+		}, 1500);
+	} else {
+		Ext.MessageBox.show({
+			title : title,
+			msg : msg,
+			width : 400,
+			icon : Ext.MessageBox.ERROR
+		});
+	}
 }
 
 function toggleDisabled() {
@@ -105,7 +138,7 @@ Ext.onReady(function() {
 		},
 
 		fireSubmit : function(e) {
-			if (e.ctrlKey && Ext.EventObject.ENTER == e.getKey()) {
+			if (e.ctrlKey && e.ENTER == e.getKey()) {
 				sendMessage();
 			}
 		}
@@ -181,6 +214,7 @@ Ext.onReady(function() {
 
 	messageGrid = Ext.create('Ext.grid.Panel', {
 		region : 'center',
+		rowLines : false,
 		store : messageStore,
 		columns : [ {
 			text : '聊天记录',
@@ -188,7 +222,8 @@ Ext.onReady(function() {
 			flex : 1,
 			hideable : false,
 			renderer : function(value, p, record) {
-				return Ext.String.format('<p><strong>{0}</strong> <em>{1}</em>:</p><p>{2}</p>',
+				return Ext.String.format(
+						'<p class="message-meta"><strong>{0}</strong> <em>{1}</em></p><p>{2}</p>',
 						record.data.name, record.data.time, value);
 			}
 		} ]
@@ -254,9 +289,17 @@ Ext.onReady(function() {
 				name : 'username',
 				afterLabelTextTpl : required,
 				allowBlank : false,
-				minLength : 6
+				listeners : {
+					specialkey : function(field, e) {
+						// e.HOME, e.END, e.PAGE_UP, e.PAGE_DOWN,
+						// e.TAB, e.ESC, arrow keys: e.LEFT, e.RIGHT, e.UP,
+						// e.DOWN
+						if (e.getKey() == e.ENTER) {
+							login(this);
+						}
+					}
+				}
 			} ],
-
 			buttons : [ {
 				text : '重置',
 				handler : function() {
@@ -265,18 +308,17 @@ Ext.onReady(function() {
 			}, {
 				text : '登录',
 				handler : function() {
-					var form = this.up('form').getForm();
-					if (form.isValid()) {
-						login(form.getValues().username);
-					}
+					login(this);
 				}
 			} ]
 		} ]
 	});
 
-	if (!username) {
-		openLoginWindow();
-	}
+	(function() {
+		if (!username) {
+			openLoginWindow();
+		}
+	})();
 
 	dwr.engine.setActiveReverseAjax(true);
 
