@@ -1,5 +1,8 @@
 package org.cweili.webchat.domain;
 
+import org.directwebremoting.annotations.DataTransferObject;
+
+@DataTransferObject
 public class User {
 
 	private String name;

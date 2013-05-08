@@ -80,7 +80,7 @@
 		<!-- Use Customer ScriptSessionManager -->
 		<init-param>
 			<param-name>org.directwebremoting.extend.ScriptSessionManager</param-name>
-			<param-value>org.cweili.webchat.util.DwrScriptSessionManager</param-value>
+			<param-value>org.cweili.webchat.util.ScriptSessionManager</param-value>
 		</init-param>
 		<load-on-startup>1</load-on-startup>
 	</servlet>

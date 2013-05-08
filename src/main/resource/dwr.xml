@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<beans
-	xmlns="http://www.springframework.org/schema/beans"
+<beans xmlns="http://www.springframework.org/schema/beans"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xmlns:context="http://www.springframework.org/schema/context"
 	xmlns:dwr="http://www.directwebremoting.org/schema/spring-dwr"
@@ -11,15 +10,12 @@
 	http://www.directwebremoting.org/schema/spring-dwr
 	http://www.directwebremoting.org/schema/spring-dwr-3.0.xsd"
 	default-lazy-init="true">
-	
+
 	<!-- 自动扫描包，可以写多个 -->
-	<context:component-scan base-package="org.cweili.*.*,org.cweili.*.*.*"/>
-	
-	<dwr:configuration>
-		<dwr:convert type="collection" class="java.util.Collection" />
-		<dwr:convert type="bean" class="java.lang.Object" />
-	</dwr:configuration>
-	<dwr:annotation-config id="dwrAnnotationConfig"/>
-	<dwr:annotation-scan base-package="org.cweili.*.*" scanDataTransferObject="true" scanRemoteProxy="true"/>
-	
+	<context:component-scan base-package="org.cweili.*.*,org.cweili.*.*.*" />
+
+	<dwr:configuration />
+	<dwr:annotation-config id="dwrAnnotationConfig" />
+	<dwr:annotation-scan base-package="org.cweili.*.*" scanDataTransferObject="true" scanRemoteProxy="true" />
+
 </beans>

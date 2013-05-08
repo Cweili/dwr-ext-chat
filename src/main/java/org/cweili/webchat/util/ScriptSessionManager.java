@@ -10,16 +10,15 @@ import org.directwebremoting.impl.DefaultScriptSessionManager;
  * @version 2013-5-8 上午11:07:13
  * 
  */
-public class DwrScriptSessionManager extends DefaultScriptSessionManager {
+public class ScriptSessionManager extends DefaultScriptSessionManager {
 
-	public DwrScriptSessionManager() {
+	public ScriptSessionManager() {
 		super();
 		addScriptSessionListener(new ScriptSessionListener() {
 
 			@Override
 			public void sessionDestroyed(ScriptSessionEvent ev) {
-				Global.chat.logout((String) ev.getSession().getAttribute(
-						Global.USERNAME));
+				Global.chat.logout((String) ev.getSession().getAttribute(Global.USERNAME));
 			}
 
 			@Override
