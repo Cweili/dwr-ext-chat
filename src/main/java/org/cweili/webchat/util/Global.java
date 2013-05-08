@@ -12,7 +12,7 @@ import org.cweili.webchat.service.Chat;
  * @version 2013-5-7 下午5:20:20
  * 
  */
-public class StaticVariable {
+public class Global {
 
 	public static final String SUCCESS = "success";
 	public static final String ERROR = "error";
