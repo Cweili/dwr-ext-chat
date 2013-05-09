@@ -5,6 +5,7 @@ import org.directwebremoting.event.ScriptSessionListener;
 import org.directwebremoting.impl.DefaultScriptSessionManager;
 
 /**
+ * 自己实现 ScriptSessionManager 监听 ScriptSession
  * 
  * @author Cweili
  * @version 2013-5-8 上午11:07:13

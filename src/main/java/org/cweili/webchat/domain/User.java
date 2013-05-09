@@ -2,6 +2,13 @@ package org.cweili.webchat.domain;
 
 import org.directwebremoting.annotations.DataTransferObject;
 
+/**
+ * 用户
+ * 
+ * @author Cweili
+ * @version 2013-5-9 下午3:18:20
+ * 
+ */
 @DataTransferObject
 public class User {
 

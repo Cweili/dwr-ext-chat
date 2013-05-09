@@ -7,6 +7,7 @@ import org.cweili.webchat.domain.User;
 import org.cweili.webchat.service.Chat;
 
 /**
+ * 全局变量
  * 
  * @author Cweili
  * @version 2013-5-7 下午5:20:20
