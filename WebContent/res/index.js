@@ -1,6 +1,5 @@
 var SUCCESS = 'success';
 
-var username = null;
 var onlineListStore = null;
 var messageStore = null;
 var editor = null;
@@ -9,7 +8,6 @@ var messageGrid = null;
 var sendBox = null;
 var viewport = null;
 var loginWindow = null;
-var disabled = false;
 
 function updateOnlineList(onlineList) {
 	if (onlineList && onlineList.length > 0) {
@@ -30,48 +28,6 @@ function addMessage(name, time, message) {
 	if (messageGrid) {
 		messageGrid.getView().focusRow(messageGrid.getStore().getCount() - 1);
 	}
-}
-
-function sendMessage() {
-	if (editor) {
-		editor.setLoading(true);
-		Chat.sendMessage(editor.getValue(), function(data) {
-			editor.setLoading(false);
-			if (SUCCESS == data) {
-				editor.setValue('');
-			} else {
-				showErrorBox('发送失败', '服务器出现错误', editor);
-			}
-		});
-	}
-}
-
-function openLoginWindow() {
-	if (loginWindow && viewport) {
-		loginWindow.show();
-		toggleDisabled();
-	}
-}
-
-function login(form) {
-	loginWindow.setLoading(true);
-	form = form.up('form').getForm();
-	var name;
-	if (form.isValid()) {
-		name = form.getValues().username;
-	} else {
-		return;
-	}
-	Chat.login(name, function(data) {
-		loginWindow.setLoading(false);
-		if (SUCCESS == data) {
-			username = name;
-			toggleDisabled();
-			loginWindow.hide();
-		} else {
-			showErrorBox('登录失败', '你的用户名已经被占用', loginWindow);
-		}
-	});
 }
 
 function showErrorBox(title, message, target) {
@@ -96,19 +52,66 @@ function showErrorBox(title, message, target) {
 	}
 }
 
-function toggleDisabled() {
-	if (disabled) {
-		disabled = false;
-		onlineListGrid.enable();
-		messageGrid.enable();
-		sendBox.enable();
-	} else {
-		disabled = true;
-		onlineListGrid.disable();
-		messageGrid.disable();
-		sendBox.disable();
+var page = {
+	username : null,
+	sendMessage : function() {
+		if (editor) {
+			editor.setLoading(true);
+			Chat.sendMessage(editor.getValue(), function(data) {
+				editor.setLoading(false);
+				if (SUCCESS == data) {
+					editor.setValue('');
+				} else {
+					showErrorBox('发送失败', '服务器出现错误', editor);
+				}
+			});
+		}
+	},
+
+	openLoginWindow : function() {
+		if (loginWindow && viewport) {
+			loginWindow.show();
+			this.toggleDisabled();
+		}
+	},
+
+	login : function(form) {
+		loginWindow.setLoading(true);
+		form = form.up('form').getForm();
+		var name;
+		if (form.isValid()) {
+			name = form.getValues().username;
+		} else {
+			return;
+		}
+		Chat.login(name, function(data) {
+			loginWindow.setLoading(false);
+			if (SUCCESS == data) {
+				page.username = name;
+				page.toggleDisabled();
+				loginWindow.hide();
+			} else {
+				showErrorBox('登录失败', '你的用户名已经被占用', loginWindow);
+			}
+		});
+	},
+
+	disabled : false,
+
+	toggleDisabled : function() {
+		if (this.disabled) {
+			this.disabled = false;
+			onlineListGrid.enable();
+			messageGrid.enable();
+			sendBox.enable();
+		} else {
+			this.disabled = true;
+			onlineListGrid.disable();
+			messageGrid.disable();
+			sendBox.disable();
+		}
 	}
-}
+};
 
 Ext.tip.QuickTipManager.init();
 
@@ -139,7 +142,7 @@ Ext.onReady(function() {
 
 		fireSubmit : function(e) {
 			if (e.ctrlKey && e.ENTER == e.getKey()) {
-				sendMessage();
+				page.sendMessage();
 			}
 		}
 	});
@@ -295,7 +298,7 @@ Ext.onReady(function() {
 						// e.TAB, e.ESC, arrow keys: e.LEFT, e.RIGHT, e.UP,
 						// e.DOWN
 						if (e.getKey() == e.ENTER) {
-							login(this);
+							page.login(this);
 						}
 					}
 				}
@@ -308,15 +311,15 @@ Ext.onReady(function() {
 			}, {
 				text : '登录',
 				handler : function() {
-					login(this);
+					page.login(this);
 				}
 			} ]
 		} ]
 	});
 
 	(function() {
-		if (!username) {
-			openLoginWindow();
+		if (!page.username) {
+			page.openLoginWindow();
 		}
 	})();
 
