@@ -16,6 +16,6 @@
 
 	<dwr:configuration />
 	<dwr:annotation-config id="dwrAnnotationConfig" />
-	<dwr:annotation-scan base-package="org.cweili.*.*" scanDataTransferObject="true" scanRemoteProxy="true" />
+	<dwr:annotation-scan base-package="org.cweili.*.*" />
 
 </beans>
